@@ -150,41 +150,11 @@ int test_main()
 	return 0;
 		}
 
-std::ostream& operator<<(std::ostream& os, const privateKey_p& privateKey) {
-			// Serialize the private key structure to the output stream
-			os << privateKey.Q << '\n'
-				<< privateKey.Q_wo_z << '\n'
-				<< privateKey.polynomy_z << '\n'
-				<< privateKey.lambdas << '\n'
-				<< privateKey.L << '\n'
-				<< privateKey.A << '\n'
-				<< privateKey.A_T << '\n'
-				<< privateKey.b_T << '\n'
-				<< privateKey.A_S << '\n'
-				<< privateKey.b_S << '\n';
 
-			return os;
-		}
-
-std::istream& operator>>(std::istream& is, privateKey_p& privateKey) {
-			// Deserialize the private key structure from the input stream
-			is >> privateKey.Q
-				>> privateKey.Q_wo_z
-				>> privateKey.polynomy_z
-				>> privateKey.lambdas
-				>> privateKey.L
-				>> privateKey.A
-				>> privateKey.A_T
-				>> privateKey.b_T
-				>> privateKey.A_S
-				>> privateKey.b_S;
-
-			return is;
-		}
 int main(int argc, char* argv[]) {
 	GF2X modulus;
-	long mod=6;
-	long v = 56; long o = 48; long t=3;
+	long mod = 6;
+	long v = 56; long o = 48; long t = 3;
 	publicKey_p pk;
 	privateKey_p sk;
 
@@ -217,8 +187,9 @@ int main(int argc, char* argv[]) {
 			KeyGen(puk, prk, v, o);
 			std::ofstream publicKeyFile("key.puk", std::ios::binary);
 			if (publicKeyFile.is_open()) {
-				publicKeyFile.write(reinterpret_cast<const char*>(&puk), sizeof(puk));
-				publicKeyFile.close();
+				publicKeyFile << puk.Q;
+				publicKeyFile << puk.L;
+				publicKeyFile << puk.A;
 				std::cout << "Public key written to key.puk" << std::endl;
 			}
 			else {
@@ -226,12 +197,18 @@ int main(int argc, char* argv[]) {
 			}
 			std::ofstream privateKeyFile("key.priv", std::ios::binary);
 			if (privateKeyFile.is_open()) {
-				privateKeyFile.write(reinterpret_cast<const char*>(&prk), sizeof(prk));
+				privateKeyFile << prk.Q;
+				privateKeyFile << prk.L;
+				privateKeyFile << prk.A;
+				privateKeyFile << prk.A_T;
+				privateKeyFile << prk.b_T;
+				privateKeyFile << prk.A_S;
+				privateKeyFile << prk.b_S;
 				privateKeyFile.close();
-				std::cout << "Private key written to key.priv" << std::endl;
+				std::cout << "Private key saved to " << "key.priv" << std::endl;
 			}
 			else {
-				std::cout << "Unable to open key.priv for writing." << std::endl;
+				std::cout << "Unable to open " << "key.priv" << " for writing." << std::endl;
 			}
 		}
 		else if (mode == "keygenp" && argc >= 6) {
@@ -250,8 +227,9 @@ int main(int argc, char* argv[]) {
 			KeyGen_p(pk, sk, v, o, t);
 			std::ofstream publicKeyFile("key.puk", std::ios::binary);
 			if (publicKeyFile.is_open()) {
-				publicKeyFile.write(reinterpret_cast<const char*>(&pk), sizeof(pk));
-				publicKeyFile.close();
+				publicKeyFile << pk.Q;
+				publicKeyFile << pk.L;
+				publicKeyFile << pk.A;
 				std::cout << "Public key written to key.puk" << std::endl;
 			}
 			else {
@@ -259,7 +237,16 @@ int main(int argc, char* argv[]) {
 			}
 			std::ofstream privateKeyFile("key.priv", std::ios::binary);
 			if (privateKeyFile.is_open()) {
-				privateKeyFile << privateKey;
+				privateKeyFile << sk.Q;
+				privateKeyFile << sk.Q_wo_z;
+				privateKeyFile << sk.polynomy_z;
+				privateKeyFile << sk.lambdas;
+				privateKeyFile << sk.L;
+				privateKeyFile << sk.A;
+				privateKeyFile << sk.A_T;
+				privateKeyFile << sk.b_T;
+				privateKeyFile << sk.A_S;
+				privateKeyFile << sk.b_S;
 				privateKeyFile.close();
 				std::cout << "Private key saved to " << "key.priv" << std::endl;
 			}
@@ -271,24 +258,31 @@ int main(int argc, char* argv[]) {
 			mod = std::stoi(argv[2]);
 			v = std::stoi(argv[3]);
 			o = std::stoi(argv[4]);
-			privateKey pk;
 
 			// Initialize modulus
 			GF2X modulus;
 			BuildIrred(modulus, mod);
 			GF2E::init(modulus);
+
 			hash_file512(dokument, argv[6], o, mod);
 			std::ifstream privateKeyFile(argv[5], std::ios::binary);
 			if (privateKeyFile.is_open()) {
-				privateKeyFile.read(reinterpret_cast<char*>(&pk), sizeof(pk));
+				privateKeyFile >> prk.Q;
+				privateKeyFile >> prk.L;
+				privateKeyFile >> prk.A;
+				privateKeyFile >> prk.A_T;
+				privateKeyFile >> prk.b_T;
+				privateKeyFile >> prk.A_S;
+				privateKeyFile >> prk.b_S;
 				privateKeyFile.close();
 			}
-			sign(podpis, pk, dokument, v, o);
+			sign(podpis, prk, dokument, v, o);
+
 			std::ofstream signFile("sign.uov", std::ios::binary);
 			if (signFile.is_open()) {
-				signFile.write(reinterpret_cast<const char*>(&podpis), sizeof(podpis));
+				signFile << podpis;
 				signFile.close();
-				std::cout << "Public key written to sign.uov" << std::endl;
+				std::cout << "Sign written to sign.uov" << std::endl;
 			}
 			else {
 				std::cout << "Unable to open file for writing." << std::endl;
@@ -299,26 +293,37 @@ int main(int argc, char* argv[]) {
 			v = std::stoi(argv[3]);
 			o = std::stoi(argv[4]);
 			t = std::stoi(argv[5]);
-			privateKey_p prk;
 
 			// Initialize modulus
 			GF2X modulus;
 			BuildIrred(modulus, mod);
 			GF2E::init(modulus);
+
 			hash_file512(dokument, argv[7], o, mod);
-			std::ifstream file(argv[6], std::ios::binary);
-			if (file.is_open()) {
-				file >> prk;
-				file.close();
+			std::ifstream privateKeyFile(argv[6], std::ios::binary);
+			if (privateKeyFile.is_open()) {
+				privateKeyFile >> sk.Q;
+				privateKeyFile >> sk.Q_wo_z;
+				privateKeyFile >> sk.polynomy_z;
+				privateKeyFile >> sk.lambdas;
+				privateKeyFile >> sk.L;
+				privateKeyFile >> sk.A;
+				privateKeyFile >> sk.A_T;
+				privateKeyFile >> sk.b_T;
+				privateKeyFile >> sk.A_S;
+				privateKeyFile >> sk.b_S;
+				privateKeyFile.close();
 				std::cout << "Private key loaded from " << argv[6] << std::endl;
 			}
 			else {
 				std::cout << "Unable to open " << argv[6] << " for reading." << std::endl;
 			}
-			sign_p_v2(podpis, prk, dokument, v, o, t);
+
+			sign_p_v2(podpis, sk, dokument, v, o, t);
+
 			std::ofstream signFile("sign.uovp", std::ios::binary);
 			if (signFile.is_open()) {
-				signFile.write(reinterpret_cast<const char*>(&podpis), sizeof(podpis));
+				signFile << podpis;
 				signFile.close();
 				std::cout << "Sign written to sign.uovp" << std::endl;
 			}
@@ -330,22 +335,24 @@ int main(int argc, char* argv[]) {
 			mod = std::stoi(argv[2]);
 			o = std::stoi(argv[3]);
 
-
 			// Initialize modulus
 			GF2X modulus;
 			BuildIrred(modulus, mod);
 			GF2E::init(modulus);
+
 			hash_file512(dokument, argv[5], o, mod);
-			publicKey puk;
+
 			std::ifstream publicKeyFile(argv[6], std::ios::binary);
 			if (publicKeyFile.is_open()) {
-				publicKeyFile.read(reinterpret_cast<char*>(&puk), sizeof(puk));
+				publicKeyFile >> puk.Q;
+				publicKeyFile >> puk.L;
+				publicKeyFile >> puk.A;
 				publicKeyFile.close();
 
 			}
 			std::ifstream signFile(argv[4], std::ios::binary);
 			if (signFile.is_open()) {
-				signFile.read(reinterpret_cast<char*>(&podpis), sizeof(podpis));
+				signFile >> podpis;
 				signFile.close();
 
 			}
@@ -355,26 +362,27 @@ int main(int argc, char* argv[]) {
 			mod = std::stoi(argv[2]);
 			o = std::stoi(argv[3]);
 
-
 			// Initialize modulus
 			GF2X modulus;
 			BuildIrred(modulus, mod);
 			GF2E::init(modulus);
 			hash_file512(dokument, argv[5], o, mod);
-			publicKey_p puk;
+
 			std::ifstream publicKeyFile(argv[6], std::ios::binary);
 			if (publicKeyFile.is_open()) {
-				publicKeyFile.read(reinterpret_cast<char*>(&puk), sizeof(puk));
+				publicKeyFile >> pk.Q;
+				publicKeyFile >> pk.L;
+				publicKeyFile >> pk.A;
 				publicKeyFile.close();
 
 			}
 			std::ifstream signFile(argv[4], std::ios::binary);
 			if (signFile.is_open()) {
-				signFile.read(reinterpret_cast<char*>(&podpis), sizeof(podpis));
+				signFile >> podpis;
 				signFile.close();
 
 			}
-			verify_p(podpis, dokument, puk, o);
+			verify_p(podpis, dokument, pk, o);
 		}
 		else if (mode == "all" && argc >= 7) {
 			mod = std::stoi(argv[2]);
@@ -395,11 +403,12 @@ int main(int argc, char* argv[]) {
 			sign_p_v2(podpis, sk, dokument, v, o, t);
 			std::cout << "Sign done" << std::endl;
 			verify_p(podpis, dokument, pk, o);
-		
+
 		}
-		
-	else {
+
+		else {
 			std::cout << "Invalid mode or insufficient parameters or other error" << std::endl;
 		}
-	
+
+	}
 }
