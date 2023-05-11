@@ -60,7 +60,7 @@ int test_main()
 	privateKey_p sk;
 
 	publicKey puk;
-        privateKey prk;
+    privateKey prk;
 	for (t = 1; t <= 8; t++){
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &begin);
 	KeyGen_p(pk, sk, o, v, t);
@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 			GF2E::init(modulus);
 
 			// Execute KeyGen function
-			KeyGen(puk, prk, v, o);
+			KeyGen(puk, prk, o, v);
 			std::ofstream publicKeyFile("key.puk", std::ios::binary);
 			if (publicKeyFile.is_open()) {
 				publicKeyFile << puk.Q;
@@ -224,7 +224,7 @@ int main(int argc, char* argv[]) {
 			GF2E::init(modulus);
 
 			// Execute KeyGen_p function
-			KeyGen_p(pk, sk, v, o, t);
+			KeyGen_p(pk, sk, o, v, t);
 			std::ofstream publicKeyFile("key.puk", std::ios::binary);
 			if (publicKeyFile.is_open()) {
 				publicKeyFile << pk.Q;
@@ -396,10 +396,10 @@ int main(int argc, char* argv[]) {
 			GF2E::init(modulus);
 
 			// Execute KeyGen_p function
-			KeyGen_p(pk, sk, v, o, t);
+			KeyGen_p(pk, sk, o, v, t);
 			std::cout << "Generating keys done" << std::endl;
 			hash_file512(dokument, argv[6], o, mod);
-			std::cout << "File hashed and readz for sign" << std::endl;
+			std::cout << "File hashed and ready for sign" << std::endl;
 			sign_p_v2(podpis, sk, dokument, v, o, t);
 			std::cout << "Sign done" << std::endl;
 			verify_p(podpis, dokument, pk, o);
