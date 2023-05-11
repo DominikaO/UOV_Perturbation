@@ -43,11 +43,6 @@ Vec<GF2E> riesenia(Vec<Mat<GF2E>> polynomy_Q, Vec<Vec<GF2E>> polynomy_L, Vec<GF2
 
 
 	}
-
-
-	//cout << "riesenie:" << solutions << endl;
-	//cout << "hodnoty premennych" << h << endl;
-
 	return solutions;
 }
 
@@ -102,18 +97,6 @@ void KeyGen(publicKey& pk, privateKey& sk, long m_poly, long n_variables)
 	long n = n_variables; //pocet neurcitych ocot
 	generate_random_polynomials(m, n, polynomy_Q, polynomy_L, polynomy_A);
 
-	
-	/*vypis jednotlivych polynomov
-	for (long k = 0; k < m; k++)
-	{
-		cout << "Polynom cislo: " << k + 1 << endl;
-		//kvadraticka cast, linearna cast, absolutna cast
-		cout << polynomy_Q[k] << endl;
-		cout << polynomy_L[k] << endl;
-		cout << polynomy_A[k] << endl;
-		cout << "**********" << endl;
-	}
-	*/
 	//TRANSFORMACIA T
 	Mat<GF2E> A_T; //musi byt invertovatelne nad GF2
 	Vec<GF2E> b_T; //nahodny vektor hodnot GF2
@@ -138,19 +121,7 @@ void KeyGen(publicKey& pk, privateKey& sk, long m_poly, long n_variables)
 		polynomy_L_T.append(b_T * polynomy_Q[k] * transpose(A_T) + b_T * transpose(polynomy_Q[k]) * transpose(A_T) + polynomy_L[k] * transpose(A_T));
 		polynomy_A_T.append(b_T * polynomy_Q[k] * b_T + polynomy_L[k] * b_T + polynomy_A[k]);
 	}
-	/*vypis jednotlivych polynomov
-	for (long k = 0; k < m; k++)
-	{
-		cout << "Polynom cislo: po trasformacii T" << k + 1 << endl;
-		//kvadraticka cast, linearna cast, absolutna cast
-		cout << polynomy_Q_T[k] << endl;
-		cout << polynomy_L_T[k] << endl;
-		cout << polynomy_A_T[k] << endl;
-		cout << "**********" << endl;
-	}
-	cout << "bt" << b_T << endl;
-	cout << "At" << A_T << endl;
-	*/
+	
 	//TRANSFORMACIA S
 	Mat<GF2E> A_S; //musi byt invertovatelne nad GF2
 	Vec<GF2E> b_S; //nahodny vektor hodnot GF2
@@ -164,9 +135,6 @@ void KeyGen(publicKey& pk, privateKey& sk, long m_poly, long n_variables)
 			break;
 	}
 	random(b_S, m); //nahodny vektor
-
-	//cout << "bs" << b_S << endl;
-	//cout << "As" << A_S << endl;
 
 	Vec<Mat<GF2E>> polynomy_Q_S; //kvadraticke casti polynomov po aplik S
 	Vec<Vec<GF2E>> polynomy_L_S; //linearne casti polynomov po aplik S
@@ -197,18 +165,6 @@ void KeyGen(publicKey& pk, privateKey& sk, long m_poly, long n_variables)
 
 	}
 
-
-	/*vypis jednotlivych polynomov po trasformacii S a T
-	for (long k = 0; k < m; k++)
-	{
-		cout << "Polynom cislo: " << k << endl;
-		//kvadraticka cast, linearna cast, absolutna cast
-		cout << polynomy_Q_S[k] << endl;
-		cout << polynomy_L_S[k] << endl;
-		cout << polynomy_A_S[k] << endl;
-		cout << "**********" << endl;
-	}
-	*/
 	sk.A_S = A_S; sk.b_S = b_S; sk.A_T = A_T; sk.b_T = b_T;
 	sk.Q = polynomy_Q; sk.L = polynomy_L; sk.A = polynomy_A;
 
@@ -270,7 +226,7 @@ int sign(Vec<GF2E>& podpis, privateKey& sk, Vec<GF2E>& dokument, int n_variables
 		x[i] = riesenia[0][i];
 	//inverzia transformacie T
 	podpis = (x - sk.b_T) * inv(sk.A_T);
-	cout << "New vinegra were genrated "<< count_vinegars << " times"<<endl;
+	
 	return count_vinegars;
 }
 
@@ -286,12 +242,12 @@ int verify(Vec<GF2E>& podpis, Vec<GF2E>& dokument, publicKey& pk, long m_poly)
 	}
 	if (solutions == dokument)
 	{
-		cout << "Podpis je platny" << endl;
+		cout << "The signature is valid" << endl;
 		return 1;
 	}
 	else
 	{
-		cout << "Podpis nie je platny" << endl;
+		cout << "The signature is invalid" << endl;
 		return 0;
 	}
 }

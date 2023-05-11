@@ -57,14 +57,14 @@ Vec<GF2E> create_vectors(const char* hash, long oil, long mod) {
 		std::bitset<4> bits(value);
 		binary += bits.to_string();
 	}
-	//cout << "hash binary " << binary;
+	
 	Vec<GF2E> digest;
 	for (int i = 0; i < oil; i++) {
 		string substr_mod = binary.substr(i*mod, mod);
 		
 		digest.append(stringToGF2E(substr_mod));
 	}
-	//cout << digest;
+	
 	return digest;
 }
 
@@ -83,14 +83,13 @@ Vec<GF2E> create_vectors2(const std::string& hash, long oil, long mod) {
 		std::string substr_mod = binary.substr(i * mod, mod);
 		digest.append(stringToGF2E(substr_mod));
 	}
-	//std::cout << digest << std::endl;
+	
 	return digest;
 }
 
 
 void hash_file256(Vec<GF2E>& digest, const char *filename, long oil, long mod) {
 	
-
 	// Open the file
 	FILE* fp = fopen(filename, "rb");
 	if (!fp) {
@@ -108,7 +107,6 @@ void hash_file256(Vec<GF2E>& digest, const char *filename, long oil, long mod) {
 			break;
 		}
 	}
-	
 
 	// Compute the SHA-256 hash of the buffer
 
@@ -150,20 +148,12 @@ void hash_file512(Vec<GF2E>& digest, const char* filename, long oil, long mod)
 		}
 	}
 
-
-
 	string buffer_string(reinterpret_cast<char*>(buffer), BUFFER_SIZE);
 	SHA512 sha512;
 	string hash_str = sha512.hash(buffer_string);
 
-//	std::cout << "Message: " << hash_str << std::endl;
-
-
 	digest = create_vectors2(hash_str, oil, mod);
-	
 
 	fclose(fp);
-
-
 }
 

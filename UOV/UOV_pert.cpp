@@ -75,18 +75,7 @@ void KeyGen_p(publicKey_p& pk, privateKey_p& sk, long m_poly, long n_variables, 
 			polynomy_Q_plus_z[i] += polynomy_z[j] * lambdas[i][j];
 		}
 	}
-	/*
-		//vypis jednotlivych polynomov
-		for (long k = 0; k < m; k++)
-		{
-			cout << "Polynom cislo: " << k + 1 << endl;
-			//kvadraticka cast, linearna cast, absolutna cast
-			cout << polynomy_Q_plus_z[k] << endl;
-			cout << polynomy_L[k] << endl;
-			cout << polynomy_A[k] << endl;
-			cout << "**********" << endl;
-		}
-	*/
+	
 	//TRANSFORMACIA T
 	Mat<GF2E> A_T; //musi byt invertovatelne nad GF2
 	Vec<GF2E> b_T; //nahodny vektor hodnot GF2
@@ -111,20 +100,7 @@ void KeyGen_p(publicKey_p& pk, privateKey_p& sk, long m_poly, long n_variables, 
 		polynomy_L_T.append(b_T * polynomy_Q_plus_z[k] * transpose(A_T) + b_T * transpose(polynomy_Q_plus_z[k]) * transpose(A_T) + polynomy_L[k] * transpose(A_T));
 		polynomy_A_T.append(b_T * polynomy_Q_plus_z[k] * b_T + polynomy_L[k] * b_T + polynomy_A[k]);
 	}
-	/*
-		//vypis jednotlivych polynomov
-		for (long k = 0; k < m; k++)
-		{
-			cout << "Polynom cislo: po trasformacii T" << k + 1 << endl;
-			//kvadraticka cast, linearna cast, absolutna cast
-			cout << polynomy_Q_T[k] << endl;
-			cout << polynomy_L_T[k] << endl;
-			cout << polynomy_A_T[k] << endl;
-			cout << "**********" << endl;
-		}
-		cout << "bt" << b_T << endl;
-		cout << "At" << A_T << endl;
-	*/
+	
 	//TRANSFORMACIA S
 	Mat<GF2E> A_S; //musi byt invertovatelne nad GF2
 	Vec<GF2E> b_S; //nahodny vektor hodnot GF2
@@ -138,10 +114,7 @@ void KeyGen_p(publicKey_p& pk, privateKey_p& sk, long m_poly, long n_variables, 
 			break;
 	}
 	random(b_S, m); //nahodny vektor
-	/*
-		cout << "bs" << b_S << endl;
-		cout << "As" << A_S << endl;
-	*/
+	
 	Vec<Mat<GF2E>> polynomy_Q_S; //kvadraticke casti polynomov po aplik S
 	Vec<Vec<GF2E>> polynomy_L_S; //linearne casti polynomov po aplik S
 	Vec<GF2E> polynomy_A_S; //absolutne casti polynomov po aplik S
@@ -170,19 +143,7 @@ void KeyGen_p(publicKey_p& pk, privateKey_p& sk, long m_poly, long n_variables, 
 		polynomy_A_S.append(a);
 
 	}
-	/*
-
-		//vypis jednotlivych polynomov po trasformacii S a T
-		for (long k = 0; k < m; k++)
-		{
-			cout << "Polynom cislo: " << k << endl;
-			//kvadraticka cast, linearna cast, absolutna cast
-			cout << polynomy_Q_S[k] << endl;
-			cout << polynomy_L_S[k] << endl;
-			cout << polynomy_A_S[k] << endl;
-			cout << "**********" << endl;
-		}
-	*/
+	
 	sk.A_S = A_S; sk.b_S = b_S; sk.A_T = A_T; sk.b_T = b_T;
 	sk.Q = polynomy_Q_plus_z; sk.L = polynomy_L; sk.A = polynomy_A; sk.Q_wo_z = polynomy_Q; sk.lambdas = lambdas; sk.polynomy_z = polynomy_z;
 
@@ -330,7 +291,6 @@ void sign_p_random(Vec<GF2E>& podpis, privateKey_p& sk, Vec<GF2E>& dokument, int
 
 		Y.kill();
 		for (long i = 0; i < m_poly; i++) {
-			//Y.append(sk.Q[i] * x);
 			Y.append(sk.Q_wo_z[i] * x);
 		}
 
@@ -353,7 +313,7 @@ void sign_p_random(Vec<GF2E>& podpis, privateKey_p& sk, Vec<GF2E>& dokument, int
 		//prechadzaj vsetkych q^t volieb pre z_1,z_2,...,z_t
 		//a odcitaj od pravych stran lambda_1*z_1+lambda_2*z_2...
 		for (ZZ pokus_cislo = conv<ZZ>(0); pokus_cislo < power2_ZZ(GF2E::degree() * t); pokus_cislo++)
-			//for (long pokus_cislo = 0; pokus_cislo < 1000; pokus_cislo++)
+			
 		{
 			random(c, t);
 			riesenia.kill();
@@ -700,11 +660,11 @@ int sign_p_v2(Vec<GF2E>& podpis, privateKey_p& sk, Vec<GF2E>& dokument, int n_va
 	Vec<Vec<GF2E>> riesenia;
 	x.SetLength(m_poly + n_variables);
 
-	//LS.SetDims(m_poly, m_poly+t);
+
 	LS_PS.SetDims(m_poly, m_poly + t + 1);
-	//inverzia transformacie S
+	
 	dokument_inverzia_S = (dokument - sk.b_S) * inv(sk.A_S);
-	//inverzia UOV trapdooru
+	
 	int count_new_vinegar = 0;
 	while (1)
 	{
@@ -825,12 +785,10 @@ int sign_p_v2(Vec<GF2E>& podpis, privateKey_p& sk, Vec<GF2E>& dokument, int n_va
 			}
 		}
 		
-				//cout << poly_z_Q << endl;
-				//cout << poly_z_L << endl;
-				//cout << poly_z_A << endl;
+				
 		
 		GB(riesenie_z_i, t, poly_z_Q, poly_z_L, poly_z_A);
-		//cout << "riesenie: " << riesenie_z_i << endl;
+		
 
 		if (riesenie_z_i.length() != t)
 		{
@@ -846,14 +804,13 @@ int sign_p_v2(Vec<GF2E>& podpis, privateKey_p& sk, Vec<GF2E>& dokument, int n_va
 			}
 			x[k] = x_i;
 		}
-		//cout << x << endl;
+		
 		break;
 	}
 
 riesenie_najdene:
 	//inverzia transformacie T
 	podpis = (x - sk.b_T) * inv(sk.A_T);
-		cout <<"New vinegars generated " <<count_new_vinegar <<" times" <<endl;
 	return count_new_vinegar;
 
 }
@@ -871,83 +828,15 @@ int verify_p(Vec<GF2E>& podpis, Vec<GF2E>& dokument, publicKey_p& pk, long m_pol
 	}
 	if (solutions == dokument)
 	{
-		cout << "Podpis je platny" << endl;
+		cout << "The signature is valid" << endl;
 		return 1;
 	}
 	else
 	{
-		cout << "Podpis nie je platny" << endl;
+		cout << "The signature is invalid" << endl;
 		return 0;
 	}
 }
 
 
 
-
-
-
-/*
-
-int main()
-{
-	GF2X modulus;
-	long mod = 3;
-	BuildIrred(modulus, mod);
-	GF2E::init(modulus);
-
-	Vec<Mat<GF2E>> Q; //kvadraticke casti polynomov
-	Vec<Vec<GF2E>> L; //linearne casti polynomov
-	Vec<GF2E> A; //absolutne casti polynomov
-	Vec<GF2E> h;
-	Vec<GF2E> riesenia;
-
-
-	generuj_vsetky_moznosti();
-
-
-	//todo exhastive search
-	long v = 3; long o = 4; long t = 2;
-
-	publicKey pk;
-	privateKey sk;
-	KeyGen(pk, sk, o, v, t);
-
-
-
-	Vec<GF2E> dokument;
-	Vec<GF2E> podpis;
-	dokument = random_vec_GF2E(o);
-	sign(podpis, sk, dokument, v, o, t);
-	verify(podpis, dokument, pk, o);
-
-
-
-
-
-	SetSeed(ZZ(time(NULL))); // Initialize NTL random number generator with current time
-
-	int m = 3; // Number of polynomials
-	int n = 4; // Number of vinegar terms
-
-	Vec<Mat<GF2>> polynomy_Q;
-	Vec<Vec<GF2>> polynomy_L;
-	Vec<GF2> polynomy_A;
-
-	generate_random_polynomials(m, n, polynomy_Q, polynomy_L, polynomy_A);
-
-	// Print the generated polynomials
-	for (int i = 0; i < m; i++) {
-		cout << "Polynomial " << i + 1 << ":" << endl;
-		cout << "Quadratic part:" << endl << polynomy_Q[i] << endl;
-		cout << "Linear part:" << endl << polynomy_L[i] << endl;
-		cout << "Absolute part:" << endl << polynomy_A[i] << endl;
-		cout << endl;
-	}
-
-	return 0;
-
-
-	return 0;
-}
-
-*/
