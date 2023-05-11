@@ -150,7 +150,37 @@ int test_main()
 	return 0;
 		}
 
+std::ostream& operator<<(std::ostream& os, const privateKey_p& privateKey) {
+			// Serialize the private key structure to the output stream
+			os << privateKey.Q << '\n'
+				<< privateKey.Q_wo_z << '\n'
+				<< privateKey.polynomy_z << '\n'
+				<< privateKey.lambdas << '\n'
+				<< privateKey.L << '\n'
+				<< privateKey.A << '\n'
+				<< privateKey.A_T << '\n'
+				<< privateKey.b_T << '\n'
+				<< privateKey.A_S << '\n'
+				<< privateKey.b_S << '\n';
 
+			return os;
+		}
+
+std::istream& operator>>(std::istream& is, privateKey_p& privateKey) {
+			// Deserialize the private key structure from the input stream
+			is >> privateKey.Q
+				>> privateKey.Q_wo_z
+				>> privateKey.polynomy_z
+				>> privateKey.lambdas
+				>> privateKey.L
+				>> privateKey.A
+				>> privateKey.A_T
+				>> privateKey.b_T
+				>> privateKey.A_S
+				>> privateKey.b_S;
+
+			return is;
+		}
 int main(int argc, char* argv[]) {
 	GF2X modulus;
 	long mod=6;
@@ -229,12 +259,12 @@ int main(int argc, char* argv[]) {
 			}
 			std::ofstream privateKeyFile("key.priv", std::ios::binary);
 			if (privateKeyFile.is_open()) {
-				privateKeyFile.write(reinterpret_cast<const char*>(&sk), sizeof(sk));
+				privateKeyFile << privateKey;
 				privateKeyFile.close();
-				std::cout << "Private key written to key.priv" << std::endl;
+				std::cout << "Private key saved to " << "key.priv" << std::endl;
 			}
 			else {
-				std::cout << "Unable to open key.priv for writing." << std::endl;
+				std::cout << "Unable to open " << "key.priv" << " for writing." << std::endl;
 			}
 		}
 		else if (mode == "sign" && argc >= 7) {
@@ -276,17 +306,21 @@ int main(int argc, char* argv[]) {
 			BuildIrred(modulus, mod);
 			GF2E::init(modulus);
 			hash_file512(dokument, argv[7], o, mod);
-			std::ifstream privateKeyFile(argv[6], std::ios::binary);
-			if (privateKeyFile.is_open()) {
-				privateKeyFile.read(reinterpret_cast<char*>(&prk), sizeof(prk));
-				privateKeyFile.close();
+			std::ifstream file(argv[6], std::ios::binary);
+			if (file.is_open()) {
+				file >> prk;
+				file.close();
+				std::cout << "Private key loaded from " << argv[6] << std::endl;
+			}
+			else {
+				std::cout << "Unable to open " << argv[6] << " for reading." << std::endl;
 			}
 			sign_p_v2(podpis, prk, dokument, v, o, t);
 			std::ofstream signFile("sign.uovp", std::ios::binary);
 			if (signFile.is_open()) {
 				signFile.write(reinterpret_cast<const char*>(&podpis), sizeof(podpis));
 				signFile.close();
-				std::cout << "Public key written to sign.uovp" << std::endl;
+				std::cout << "Sign written to sign.uovp" << std::endl;
 			}
 			else {
 				std::cout << "Unable to open file for writing." << std::endl;
